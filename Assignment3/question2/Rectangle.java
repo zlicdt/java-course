@@ -9,6 +9,8 @@ public class Rectangle extends ClosedFigure {
         this.width = width;
         this.height = height;
     }
+    // The x, y, width, and height are the coordinates of the top-left corner of the rectangle
+    // They are private, needs getters
     public double getX() {
         return x;
     }

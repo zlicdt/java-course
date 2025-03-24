@@ -5,14 +5,17 @@ public class PoliceDog extends Dog{
     private static int totalHoursforAll;
     private int times;
     private Police trainer;
+    // Constructor
     public PoliceDog(String name, double weight) {
         super(name, weight);
         weekHours = 0;
         totalHoursforAll = 0;
         times = 0;
     }
+    // Method to train the dog
     public void train(int hours) {
         times++;
+        // If the days is > 7, should be reset to 0
         if (times > 7) {
             times = times % 7;
             weekHours = 0;

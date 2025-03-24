@@ -8,10 +8,12 @@ public class Square extends Rectangle {
         this.y = y;
         this.side = side;
     }
+    // Override perimeter method from CloseFigure class
     @Override
     public double perimeter() {
         return 4 * side;
     }
+    // Override toString method
     @Override
     public String toString() {
         return "Square(" + x + "," + y + "," + side + ")";

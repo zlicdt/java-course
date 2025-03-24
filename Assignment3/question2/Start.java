@@ -11,7 +11,7 @@ public static void main(String[] args) {
 		System.out.println( r1 + " perimeter: " + r1.perimeter());
 		System.out.println( s + " perimeter: " + s.perimeter());
 		System.out.println( s1 + " perimeter: "+ s1.perimeter());
-		
+		// Test isInscribed method
 		System.out.print(c.toString() + " is inscribed in " + c1.toString() + ": ");
 		System.out.println(c.isInscribed(c1));
 		
