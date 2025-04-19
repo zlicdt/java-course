@@ -91,7 +91,10 @@ public class RegisterPanel extends JPanel {
         });
         
         JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.add(new JLabel("User Register", JLabel.CENTER), BorderLayout.NORTH);
+        // mainPanel.add(new JLabel("User Register", JLabel.CENTER), BorderLayout.NORTH);
+        JLabel titleLabel = new JLabel("User Registration", JLabel.CENTER);
+        titleLabel.setFont(new Font("", Font.BOLD, 24));
+        mainPanel.add(titleLabel, BorderLayout.NORTH);
         mainPanel.add(formPanel, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         
