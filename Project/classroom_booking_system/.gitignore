@@ -42,3 +42,6 @@ hs_err_pid*
 # OS specific
 .DS_Store
 Thumbs.db
+
+# Database files
+data.db

@@ -1,5 +1,5 @@
 package com.zlicdt;
-import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import com.zlicdt.db.sqliteAction;
 /*
  * Main class to launch the Classroom Booking System application.
@@ -15,7 +15,7 @@ public class Main {
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                FlatIntelliJLaf.setup();
+                FlatMacLightLaf.setup();
                 // Create and set up the main frame
                 Frame frame = new Frame();
                 frame.setVisible(true);

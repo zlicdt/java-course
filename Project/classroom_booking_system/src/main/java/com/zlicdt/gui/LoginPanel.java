@@ -80,7 +80,12 @@ public class LoginPanel extends JPanel {
         });
         
         JPanel mainPanel = new JPanel(new BorderLayout());
-        mainPanel.add(new JLabel("User login", JLabel.CENTER), BorderLayout.NORTH);
+        
+        // 添加系统标题，使用与MainPanel相同的样式
+        JLabel titleLabel = new JLabel("Classroom Booking System", JLabel.CENTER);
+        titleLabel.setFont(new Font("", Font.BOLD, 24));
+        mainPanel.add(titleLabel, BorderLayout.NORTH);
+        
         mainPanel.add(formPanel, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         
@@ -91,24 +96,34 @@ public class LoginPanel extends JPanel {
     
     private boolean validateLogin(String username, String password) {
         // Connect to database
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        boolean loginSuccess = false;
+        
         try {
-            Connection conn = DriverManager.getConnection("jdbc:sqlite:data.db");
+            conn = DriverManager.getConnection("jdbc:sqlite:data.db");
             String sql = "SELECT * FROM accounts WHERE username = ? AND password = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
             pstmt.setString(2, password);
-            ResultSet rs = pstmt.executeQuery();
+            rs = pstmt.executeQuery();
             if (rs.next()) {
-                return true; // Match
+                loginSuccess = true; // Match
             }
-            rs.close();
-            pstmt.close();
-            conn.close();
-
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+        } finally {
+            // 确保关闭数据库资源
+            try {
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                System.out.println("Error closing database resources: " + e.getMessage());
+            }
         }
         // If there is no match records, return false
-        return false;
+        return loginSuccess;
     }
 }

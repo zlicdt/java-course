@@ -10,6 +10,7 @@ public class Frame extends JFrame {
     private LoginPanel loginPanel;
     private RegisterPanel registerPanel;
     private MainPanel mainPanel;
+    private BookingHistoryPanel bookingHistoryPanel;
     
     public Frame() {
         setTitle("Classroom Booking System");
@@ -25,11 +26,13 @@ public class Frame extends JFrame {
         loginPanel = new LoginPanel(this);
         registerPanel = new RegisterPanel(this);
         mainPanel = new MainPanel(this);
+        bookingHistoryPanel = new BookingHistoryPanel(this);
         
         // Add panels to the container
         containerPanel.add(loginPanel, "login");
         containerPanel.add(registerPanel, "register");
         containerPanel.add(mainPanel, "main");
+        containerPanel.add(bookingHistoryPanel, "bookingHistory");
         
         // Set the initial panel to login
         cardLayout.show(containerPanel, "login");
@@ -40,8 +43,15 @@ public class Frame extends JFrame {
     
     // Switch to the specified panel 
     public void showPanel(String panelName) {
+        if (panelName.equals("main")) {
+            mainPanel.updateDisplay();
+        } else if (panelName.equals("bookingHistory")) {
+            bookingHistoryPanel.updateDisplay();
+        }
+        
         cardLayout.show(containerPanel, panelName);
     }
+    
     public void updateMainPanel() {
         mainPanel.updateDisplay();
     }

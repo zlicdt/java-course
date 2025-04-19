@@ -101,22 +101,33 @@ public class RegisterPanel extends JPanel {
     }
     
     private boolean isEmailTaken(String email) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        boolean taken = false;
+        
         try {
-            Connection conn = DriverManager.getConnection("jdbc:sqlite:data.db");
+            conn = DriverManager.getConnection("jdbc:sqlite:data.db");
             String sql = "SELECT COUNT(*) FROM accounts WHERE email = ?";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, email);
-            ResultSet rs = pstmt.executeQuery();
+            rs = pstmt.executeQuery();
             rs.next();
             int count = rs.getInt(1);
-            rs.close();
-            pstmt.close();
-            conn.close();
-            return count > 0; // Email is taken if count is greater than 0
+            taken = count > 0; // Email is taken if count is greater than 0
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-            return false;
+        } finally {
+            // 确保关闭数据库资源
+            try {
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                System.out.println("Error closing database resources: " + e.getMessage());
+            }
         }
+        return taken;
     }
 
     private boolean validateRegistration(String username, String password, String confirmPassword, String email) {
@@ -144,21 +155,32 @@ public class RegisterPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Email already registered.", "Validation Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
+        
         // Write into database
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        boolean success = false;
+        
         try {
-            Connection conn = DriverManager.getConnection("jdbc:sqlite:data.db");
+            conn = DriverManager.getConnection("jdbc:sqlite:data.db");
             String sql = "INSERT INTO accounts (username, password, email) VALUES (?, ?, ?)";
-            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
             pstmt.setString(2, password);
             pstmt.setString(3, email);
             pstmt.executeUpdate();
-            pstmt.close();
-            conn.close();
-            return true; // Registration successful
+            success = true; // Registration successful
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-            return false;
+        } finally {
+            // 确保关闭数据库资源
+            try {
+                if (pstmt != null) pstmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                System.out.println("Error closing database resources: " + e.getMessage());
+            }
         }
+        return success;
     }
 }
