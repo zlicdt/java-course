@@ -48,7 +48,13 @@ public class BookingHistoryPanel extends JPanel {
         String[] columnNames = {"Date", "Time", "Room", "Status"};
         Object[][] data = {}; // Will be populated with actual booking data
         
-        bookingsTable = new JTable(data, columnNames);
+        // 创建一个不可编辑的表格模型
+        bookingsTable = new JTable(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // 使所有单元格不可编辑
+            }
+        };
         bookingsTable.setFillsViewportHeight(true);
         
         scrollPane = new JScrollPane(bookingsTable);
@@ -149,11 +155,16 @@ public class BookingHistoryPanel extends JPanel {
                 bookingsArray[i] = bookingsList.get(i);
             }
             
-            // Update table model with new data
+            // 使用不可编辑的表格模型更新数据
             bookingsTable.setModel(new javax.swing.table.DefaultTableModel(
                 bookingsArray,
                 new String[] {"Date", "Time", "Room", "Status", "ID"}
-            ));
+            ) {
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false; // 使所有单元格不可编辑
+                }
+            });
             
             // Hide the ID column as it's only needed for internal operations
             if (bookingsTable.getColumnCount() > 4) {
