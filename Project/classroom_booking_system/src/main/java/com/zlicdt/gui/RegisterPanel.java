@@ -5,6 +5,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import java.sql.*;
+
 public class RegisterPanel extends JPanel {
     
     private Frame parentFrame;
@@ -19,13 +21,12 @@ public class RegisterPanel extends JPanel {
         this.parentFrame = parentFrame;
         setLayout(new BorderLayout());
         
-        // 创建注册表单面板
+        // Create registration form panel
         JPanel formPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
         
-        // 用户名输入
         JLabel usernameLabel = new JLabel("Username:");
         usernameField = new JTextField(20);
         gbc.gridx = 0;
@@ -34,7 +35,6 @@ public class RegisterPanel extends JPanel {
         gbc.gridx = 1;
         formPanel.add(usernameField, gbc);
         
-        // 密码输入
         JLabel passwordLabel = new JLabel("Password:");
         passwordField = new JPasswordField(20);
         gbc.gridx = 0;
@@ -43,7 +43,6 @@ public class RegisterPanel extends JPanel {
         gbc.gridx = 1;
         formPanel.add(passwordField, gbc);
         
-        // 确认密码
         JLabel confirmPasswordLabel = new JLabel("Password Confirm:");
         confirmPasswordField = new JPasswordField(20);
         gbc.gridx = 0;
@@ -52,7 +51,6 @@ public class RegisterPanel extends JPanel {
         gbc.gridx = 1;
         formPanel.add(confirmPasswordField, gbc);
         
-        // 邮箱
         JLabel emailLabel = new JLabel("Email:");
         emailField = new JTextField(20);
         gbc.gridx = 0;
@@ -61,7 +59,7 @@ public class RegisterPanel extends JPanel {
         gbc.gridx = 1;
         formPanel.add(emailField, gbc);
         
-        // 按钮面板
+        // Button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         registerButton = new JButton("Register");
         backToLoginButton = new JButton("Back to Login");
@@ -69,18 +67,16 @@ public class RegisterPanel extends JPanel {
         buttonPanel.add(registerButton);
         buttonPanel.add(backToLoginButton);
         
-        // 添加事件监听
         registerButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // 注册验证逻辑
+                // Confirm registration
                 String username = usernameField.getText();
                 String password = new String(passwordField.getPassword());
                 String confirmPassword = new String(confirmPasswordField.getPassword());
                 String email = emailField.getText();
                 
                 if (validateRegistration(username, password, confirmPassword, email)) {
-                    // 这里应该将用户信息保存到数据库
                     JOptionPane.showMessageDialog(RegisterPanel.this, "Registration successful");
                     parentFrame.showPanel("login");
                 }
@@ -94,19 +90,35 @@ public class RegisterPanel extends JPanel {
             }
         });
         
-        // 主面板布局
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(new JLabel("User Register", JLabel.CENTER), BorderLayout.NORTH);
         mainPanel.add(formPanel, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         
-        // 添加边距
         mainPanel.setBorder(BorderFactory.createEmptyBorder(60, 100, 60, 100));
         
         add(mainPanel, BorderLayout.CENTER);
     }
     
-    // 注册验证逻辑
+    private boolean isEmailTaken(String email) {
+        try {
+            Connection conn = DriverManager.getConnection("jdbc:sqlite:data.db");
+            String sql = "SELECT COUNT(*) FROM accounts WHERE email = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, email);
+            ResultSet rs = pstmt.executeQuery();
+            rs.next();
+            int count = rs.getInt(1);
+            rs.close();
+            pstmt.close();
+            conn.close();
+            return count > 0; // Email is taken if count is greater than 0
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
     private boolean validateRegistration(String username, String password, String confirmPassword, String email) {
         if (username.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Username cannot be empty.", "Validation Error", JOptionPane.ERROR_MESSAGE);
@@ -127,7 +139,26 @@ public class RegisterPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Invalid email address.", "Validation Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
-        // TODO: 写入数据库逻辑
-        return true;
+
+        if (isEmailTaken(email)) {
+            JOptionPane.showMessageDialog(this, "Email already registered.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        // Write into database
+        try {
+            Connection conn = DriverManager.getConnection("jdbc:sqlite:data.db");
+            String sql = "INSERT INTO accounts (username, password, email) VALUES (?, ?, ?)";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            pstmt.setString(2, password);
+            pstmt.setString(3, email);
+            pstmt.executeUpdate();
+            pstmt.close();
+            conn.close();
+            return true; // Registration successful
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
     }
 }

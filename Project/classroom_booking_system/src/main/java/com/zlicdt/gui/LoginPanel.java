@@ -2,9 +2,13 @@ package com.zlicdt.gui;
 
 import javax.swing.*;
 
+import com.zlicdt.Main;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
+import java.sql.*;
 
 public class LoginPanel extends JPanel {
     private Frame parentFrame;
@@ -57,8 +61,11 @@ public class LoginPanel extends JPanel {
                 String password = new String(passwordField.getPassword());
                 
                 if (validateLogin(username, password)) {
+                    Main.currentUser = username; // Store the current user
+                    System.out.println("Current logged user: " + Main.currentUser);
                     JOptionPane.showMessageDialog(LoginPanel.this, "Successfully logged in", "Login success", JOptionPane.INFORMATION_MESSAGE);
                     parentFrame.showPanel("main");
+                    parentFrame.updateMainPanel(); // Update the main panel display
                 } else {
                     JOptionPane.showMessageDialog(LoginPanel.this, "Wrong username or password", "Login failed", JOptionPane.ERROR_MESSAGE);
                 }
@@ -82,10 +89,26 @@ public class LoginPanel extends JPanel {
         add(mainPanel, BorderLayout.CENTER);
     }
     
-    // 简单的登录验证逻辑，实际项目中应该连接数据库验证
     private boolean validateLogin(String username, String password) {
-        // 这里应该连接数据库进行验证
-        // 临时返回示例验证结果
-        return username.equals("a") && password.equals("p");
+        // Connect to database
+        try {
+            Connection conn = DriverManager.getConnection("jdbc:sqlite:data.db");
+            String sql = "SELECT * FROM accounts WHERE username = ? AND password = ?";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            pstmt.setString(2, password);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return true; // Match
+            }
+            rs.close();
+            pstmt.close();
+            conn.close();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        // If there is no match records, return false
+        return false;
     }
 }

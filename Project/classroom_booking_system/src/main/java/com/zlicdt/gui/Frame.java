@@ -13,7 +13,7 @@ public class Frame extends JFrame {
     
     public Frame() {
         setTitle("Classroom Booking System");
-        setSize(800, 600);
+        setSize(960, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         
@@ -41,5 +41,8 @@ public class Frame extends JFrame {
     // Switch to the specified panel 
     public void showPanel(String panelName) {
         cardLayout.show(containerPanel, panelName);
+    }
+    public void updateMainPanel() {
+        mainPanel.updateDisplay();
     }
 }
