@@ -7,9 +7,8 @@ import java.awt.event.ActionListener;
 
 import java.sql.*;
 
-public class RegisterPanel extends JPanel {
+public class RegisterPanel extends BasePanel {
     
-    private Frame parentFrame;
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JPasswordField confirmPasswordField;
@@ -18,7 +17,11 @@ public class RegisterPanel extends JPanel {
     private JButton backToLoginButton;
     
     public RegisterPanel(Frame parentFrame) {
-        this.parentFrame = parentFrame;
+        super(parentFrame);
+    }
+    
+    @Override
+    protected void initializePanel() {
         setLayout(new BorderLayout());
         
         // Create registration form panel
@@ -60,7 +63,7 @@ public class RegisterPanel extends JPanel {
         formPanel.add(emailField, gbc);
         
         // Button panel
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel buttonPanel = createButtonPanel(FlowLayout.CENTER);
         registerButton = new JButton("Register");
         backToLoginButton = new JButton("Back to Login");
         
@@ -91,9 +94,8 @@ public class RegisterPanel extends JPanel {
         });
         
         JPanel mainPanel = new JPanel(new BorderLayout());
-        // mainPanel.add(new JLabel("User Register", JLabel.CENTER), BorderLayout.NORTH);
-        JLabel titleLabel = new JLabel("User Registration", JLabel.CENTER);
-        titleLabel.setFont(new Font("", Font.BOLD, 24));
+        // Create title using base class method
+        JLabel titleLabel = createTitleLabel("User Registration");
         mainPanel.add(titleLabel, BorderLayout.NORTH);
         mainPanel.add(formPanel, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
@@ -104,6 +106,7 @@ public class RegisterPanel extends JPanel {
     }
     
     private boolean isEmailTaken(String email) {
+        // Existing code remains unchanged
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -121,7 +124,7 @@ public class RegisterPanel extends JPanel {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         } finally {
-            // 确保关闭数据库资源
+            // Ensure database resources are closed
             try {
                 if (rs != null) rs.close();
                 if (pstmt != null) pstmt.close();
@@ -134,6 +137,7 @@ public class RegisterPanel extends JPanel {
     }
     
     private boolean isUsernameTaken(String username) {
+        // Existing code remains unchanged
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -147,11 +151,11 @@ public class RegisterPanel extends JPanel {
             rs = pstmt.executeQuery();
             rs.next();
             int count = rs.getInt(1);
-            taken = count > 0; // 用户名已被使用如果计数大于0
+            taken = count > 0; // Username is taken if count is greater than 0
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         } finally {
-            // 确保关闭数据库资源
+            // Ensure database resources are closed
             try {
                 if (rs != null) rs.close();
                 if (pstmt != null) pstmt.close();
@@ -164,6 +168,7 @@ public class RegisterPanel extends JPanel {
     }
 
     private boolean validateRegistration(String username, String password, String confirmPassword, String email) {
+        // Existing code remains unchanged
         if (username.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Username cannot be empty.", "Validation Error", JOptionPane.ERROR_MESSAGE);
             return false;
@@ -211,7 +216,7 @@ public class RegisterPanel extends JPanel {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         } finally {
-            // 确保关闭数据库资源
+            // Ensure database resources are closed
             try {
                 if (pstmt != null) pstmt.close();
                 if (conn != null) conn.close();

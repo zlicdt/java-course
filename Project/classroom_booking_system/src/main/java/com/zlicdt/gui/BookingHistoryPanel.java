@@ -12,22 +12,24 @@ import java.sql.Statement;
 import com.zlicdt.Main;
 import com.zlicdt.db.DatabaseManager;
 
-public class BookingHistoryPanel extends JPanel {
-    private Frame parentFrame;
+public class BookingHistoryPanel extends BasePanel {
     private JTable bookingsTable;
     private JScrollPane scrollPane;
     private DatabaseManager dbManager;
     private JLabel titleLabel;
     
     public BookingHistoryPanel(Frame parentFrame) {
-        this.parentFrame = parentFrame;
+        super(parentFrame);
+    }
+    
+    @Override
+    protected void initializePanel() {
         this.dbManager = DatabaseManager.getInstance();
         setLayout(new BorderLayout());
         
         // Create header panel
         JPanel headerPanel = new JPanel(new BorderLayout());
-        titleLabel = new JLabel("My Bookings", JLabel.CENTER);
-        titleLabel.setFont(new Font("", Font.BOLD, 24));
+        titleLabel = createTitleLabel("My Bookings");
         
         JButton backButton = new JButton("Back to Calendar");
         backButton.addActionListener(new ActionListener() {
@@ -37,16 +39,16 @@ public class BookingHistoryPanel extends JPanel {
             }
         });
         
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel buttonPanel = createButtonPanel(FlowLayout.LEFT);
         buttonPanel.add(backButton);
         
         headerPanel.add(titleLabel, BorderLayout.CENTER);
         headerPanel.add(buttonPanel, BorderLayout.WEST);
         
-        // 创建表格列名
+        // Create table column names
         String[] columnNames;
         if (Main.isAdmin) {
-            // Admin用户表格显示预订用户名
+            // Admin user table displays booking username
             columnNames = new String[]{"Date", "Time", "Room", "Status", "User"};
         } else {
             columnNames = new String[]{"Date", "Time", "Room", "Status"};
@@ -54,11 +56,11 @@ public class BookingHistoryPanel extends JPanel {
         
         Object[][] data = {}; // Will be populated with actual booking data
         
-        // 创建一个不可编辑的表格模型
+        // Create a non-editable table model
         bookingsTable = new JTable(data, columnNames) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // 使所有单元格不可编辑
+                return false; // Make all cells non-editable
             }
         };
         bookingsTable.setFillsViewportHeight(true);
@@ -75,7 +77,7 @@ public class BookingHistoryPanel extends JPanel {
                 int selectedRow = bookingsTable.getSelectedRow();
                 if (selectedRow >= 0) {
                     int bookingId = (Integer) bookingsTable.getModel().getValueAt(selectedRow, 
-                        Main.isAdmin ? 5 : 4); // ID列的索引
+                        Main.isAdmin ? 5 : 4); // Index of ID column
                     String date = (String) bookingsTable.getModel().getValueAt(selectedRow, 0);
                     String room = (String) bookingsTable.getModel().getValueAt(selectedRow, 2);
                     String username = Main.isAdmin ? 
@@ -143,13 +145,13 @@ public class BookingHistoryPanel extends JPanel {
         ResultSet rs = null;
         
         try {
-            // 根据用户类型获取预订信息
+            // Get booking information based on user type
             if (Main.isAdmin) {
-                // 管理员可以查看所有预订
+                // Admin can view all bookings
                 rs = dbManager.getAllBookings();
                 titleLabel.setText("All Bookings (Admin View)");
             } else {
-                // 普通用户只能查看自己的预订
+                // Regular users can only view their own bookings
                 rs = dbManager.getUserBookings(Main.currentUser);
                 titleLabel.setText("My Bookings");
             }
@@ -166,11 +168,11 @@ public class BookingHistoryPanel extends JPanel {
                 
                 // Add booking data to list
                 if (Main.isAdmin) {
-                    // 管理员查看包含用户名
+                    // Admin view includes username
                     Object[] bookingData = {date, time, room, "Confirmed", name, id};
                     bookingsList.add(bookingData);
                 } else {
-                    // 普通用户视图
+                    // Regular user view
                     Object[] bookingData = {date, time, room, "Confirmed", id};
                     bookingsList.add(bookingData);
                 }
@@ -182,7 +184,7 @@ public class BookingHistoryPanel extends JPanel {
                 bookingsArray[i] = bookingsList.get(i);
             }
             
-            // 更新表格模型
+            // Update table model
             if (Main.isAdmin) {
                 bookingsTable.setModel(new javax.swing.table.DefaultTableModel(
                     bookingsArray,
@@ -205,7 +207,7 @@ public class BookingHistoryPanel extends JPanel {
                 });
             }
             
-            // 隐藏ID列
+            // Hide ID column
             int idColumnIndex = Main.isAdmin ? 5 : 4;
             if (bookingsTable.getColumnCount() > idColumnIndex) {
                 bookingsTable.getColumnModel().getColumn(idColumnIndex).setMinWidth(0);
@@ -240,7 +242,7 @@ public class BookingHistoryPanel extends JPanel {
         }
     }
     
-    // Method called when the panel is displayed
+    @Override
     public void updateDisplay() {
         refreshBookings();
     }

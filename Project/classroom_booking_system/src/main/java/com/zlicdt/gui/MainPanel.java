@@ -1,8 +1,6 @@
 package com.zlicdt.gui;
 
 import javax.swing.*;
-// import javax.swing.event.ChangeEvent;
-// import javax.swing.event.ChangeListener;
 
 import com.zlicdt.Main;
 import com.zlicdt.db.DatabaseManager;
@@ -12,30 +10,30 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-// import java.util.Date;
-// import java.sql.Connection;
-// import java.sql.ResultSet;
 import java.sql.SQLException;
-// import java.sql.Statement;
 
-public class MainPanel extends JPanel {
+public class MainPanel extends BasePanel {
     
-    private Frame parentFrame;
     // For rendering the user name
-    JLabel userLabel = new JLabel(Main.currentUser);
+    private JLabel userLabel;
     // For calendar
     private JTabbedPane calendarTabs;
     private Calendar selectedDate;
     private DatabaseManager dbManager;
 
     public MainPanel(Frame parentFrame) {
-        this.parentFrame = parentFrame;
+        super(parentFrame);
+    }
+    
+    @Override
+    protected void initializePanel() {
         this.dbManager = DatabaseManager.getInstance();
+        // Initialize userLabel
+        this.userLabel = new JLabel(Main.currentUser);
+        
         setLayout(new BorderLayout());
         
-        JLabel welcomeLabel = new JLabel("Classroom Booking System", JLabel.CENTER);
-        // Create a welcome label
-        welcomeLabel.setFont(new Font("",Font.BOLD, 24));
+        JLabel welcomeLabel = createTitleLabel("Classroom Booking System");
         userLabel.setFont(new Font("",Font.PLAIN, 16));
         userLabel.setBackground(Color.LIGHT_GRAY);
         // Add a logout button
@@ -167,7 +165,7 @@ public class MainPanel extends JPanel {
                     formPanel.add(userField);
                     
                     // Button panel
-                    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+                    JPanel buttonPanel = createButtonPanel(FlowLayout.RIGHT);
                     JButton cancelButton = new JButton("Cancel");
                     JButton submitButton = new JButton("Submit Booking");
                     
@@ -341,6 +339,7 @@ public class MainPanel extends JPanel {
         }
     }
     
+    @Override
     public void updateDisplay() {
         userLabel.setText(Main.currentUser);
         repaint();

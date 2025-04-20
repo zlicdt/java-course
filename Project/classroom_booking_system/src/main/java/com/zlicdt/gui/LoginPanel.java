@@ -10,15 +10,18 @@ import java.awt.event.ActionListener;
 
 import java.sql.*;
 
-public class LoginPanel extends JPanel {
-    private Frame parentFrame;
+public class LoginPanel extends BasePanel {
     private JTextField usernameField;
     private JPasswordField passwordField;
     private JButton loginButton;
     private JButton goToRegisterButton;
     
     public LoginPanel(Frame parentFrame) {
-        this.parentFrame = parentFrame;
+        super(parentFrame);
+    }
+    
+    @Override
+    protected void initializePanel() {
         setLayout(new BorderLayout());
         
         // Create login form panel
@@ -46,7 +49,7 @@ public class LoginPanel extends JPanel {
         formPanel.add(passwordField, gbc);
         
         // Button panel
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel buttonPanel = createButtonPanel(FlowLayout.CENTER);
         loginButton = new JButton("Login");
         goToRegisterButton = new JButton("Register");
         
@@ -81,9 +84,8 @@ public class LoginPanel extends JPanel {
         
         JPanel mainPanel = new JPanel(new BorderLayout());
         
-        // 添加系统标题，使用与MainPanel相同的样式
-        JLabel titleLabel = new JLabel("Classroom Booking System", JLabel.CENTER);
-        titleLabel.setFont(new Font("", Font.BOLD, 24));
+        // Add system title using the method provided by the base class
+        JLabel titleLabel = createTitleLabel("Classroom Booking System");
         mainPanel.add(titleLabel, BorderLayout.NORTH);
         
         mainPanel.add(formPanel, BorderLayout.CENTER);
@@ -111,7 +113,7 @@ public class LoginPanel extends JPanel {
             if (rs.next()) {
                 loginSuccess = true; // Match
                 
-                // 检查是否是admin用户
+                // Check if user is admin
                 if (username.equals("admin")) {
                     Main.isAdmin = true;
                 } else {
@@ -121,7 +123,7 @@ public class LoginPanel extends JPanel {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         } finally {
-            // 确保关闭数据库资源
+            // Ensure database resources are closed
             try {
                 if (rs != null) rs.close();
                 if (pstmt != null) pstmt.close();
