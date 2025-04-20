@@ -169,4 +169,41 @@ public class DatabaseManager {
         String sql = "SELECT * FROM book WHERE name='" + username + "'";
         return executeQuery(sql);
     }
+    
+    /**
+     * Check if admin user exists in the database
+     */
+    public boolean adminExists() throws SQLException {
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        
+        try {
+            conn = getConnection();
+            stmt = conn.createStatement();
+            String sql = "SELECT * FROM accounts WHERE username='admin'";
+            rs = stmt.executeQuery(sql);
+            return rs.next(); // Returns true if admin exists
+        } finally {
+            closeResources(conn, stmt, rs);
+        }
+    }
+    
+    /**
+     * Create admin user with the given password
+     */
+    public boolean createAdminUser(String password) throws SQLException {
+        String sql = "INSERT INTO accounts (username, password, email) VALUES ('admin', '" + 
+                     password + "', 'admin@system.com')";
+        
+        return executeUpdate(sql) > 0;
+    }
+    
+    /**
+     * Get all bookings (for admin user)
+     */
+    public ResultSet getAllBookings() throws SQLException {
+        String sql = "SELECT * FROM book ORDER BY date, time";
+        return executeQuery(sql);
+    }
 }

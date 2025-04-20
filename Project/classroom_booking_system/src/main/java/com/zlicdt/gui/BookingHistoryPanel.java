@@ -4,8 +4,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-// import java.util.ArrayList;
-// import java.util.List;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,6 +17,7 @@ public class BookingHistoryPanel extends JPanel {
     private JTable bookingsTable;
     private JScrollPane scrollPane;
     private DatabaseManager dbManager;
+    private JLabel titleLabel;
     
     public BookingHistoryPanel(Frame parentFrame) {
         this.parentFrame = parentFrame;
@@ -27,7 +26,7 @@ public class BookingHistoryPanel extends JPanel {
         
         // Create header panel
         JPanel headerPanel = new JPanel(new BorderLayout());
-        JLabel titleLabel = new JLabel("My Bookings", JLabel.CENTER);
+        titleLabel = new JLabel("My Bookings", JLabel.CENTER);
         titleLabel.setFont(new Font("", Font.BOLD, 24));
         
         JButton backButton = new JButton("Back to Calendar");
@@ -44,8 +43,15 @@ public class BookingHistoryPanel extends JPanel {
         headerPanel.add(titleLabel, BorderLayout.CENTER);
         headerPanel.add(buttonPanel, BorderLayout.WEST);
         
-        // Create table to display bookings
-        String[] columnNames = {"Date", "Time", "Room", "Status"};
+        // 创建表格列名
+        String[] columnNames;
+        if (Main.isAdmin) {
+            // Admin用户表格显示预订用户名
+            columnNames = new String[]{"Date", "Time", "Room", "Status", "User"};
+        } else {
+            columnNames = new String[]{"Date", "Time", "Room", "Status"};
+        }
+        
         Object[][] data = {}; // Will be populated with actual booking data
         
         // 创建一个不可编辑的表格模型
@@ -68,14 +74,21 @@ public class BookingHistoryPanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 int selectedRow = bookingsTable.getSelectedRow();
                 if (selectedRow >= 0) {
-                    int bookingId = (Integer) bookingsTable.getModel().getValueAt(selectedRow, 4);
+                    int bookingId = (Integer) bookingsTable.getModel().getValueAt(selectedRow, 
+                        Main.isAdmin ? 5 : 4); // ID列的索引
                     String date = (String) bookingsTable.getModel().getValueAt(selectedRow, 0);
                     String room = (String) bookingsTable.getModel().getValueAt(selectedRow, 2);
+                    String username = Main.isAdmin ? 
+                        (String) bookingsTable.getModel().getValueAt(selectedRow, 4) : Main.currentUser;
                     
                     // Confirm cancellation
+                    String message = "Are you sure you want to cancel " + 
+                        (Main.isAdmin ? username + "'s " : "your ") + 
+                        "booking for " + date + " in " + room + "?";
+                    
                     int option = JOptionPane.showConfirmDialog(
                         BookingHistoryPanel.this,
-                        "Are you sure you want to cancel your booking for " + date + " in " + room + "?",
+                        message,
                         "Confirm Cancellation",
                         JOptionPane.YES_NO_OPTION
                     );
@@ -127,13 +140,19 @@ public class BookingHistoryPanel extends JPanel {
     
     // Method to refresh booking data from database
     public void refreshBookings() {
-        Connection conn = null;
-        Statement stmt = null;
         ResultSet rs = null;
         
         try {
-            // Use DatabaseManager to get user bookings
-            rs = dbManager.getUserBookings(Main.currentUser);
+            // 根据用户类型获取预订信息
+            if (Main.isAdmin) {
+                // 管理员可以查看所有预订
+                rs = dbManager.getAllBookings();
+                titleLabel.setText("All Bookings (Admin View)");
+            } else {
+                // 普通用户只能查看自己的预订
+                rs = dbManager.getUserBookings(Main.currentUser);
+                titleLabel.setText("My Bookings");
+            }
             
             // Prepare data for table model
             java.util.List<Object[]> bookingsList = new java.util.ArrayList<>();
@@ -143,34 +162,55 @@ public class BookingHistoryPanel extends JPanel {
                 String date = rs.getString("date");
                 String time = rs.getString("time");
                 String room = rs.getString("room");
+                String name = rs.getString("name");
                 
-                // Add booking data to list - status is set to "Confirmed" for all bookings
-                Object[] bookingData = {date, time, room, "Confirmed", id};
-                bookingsList.add(bookingData);
+                // Add booking data to list
+                if (Main.isAdmin) {
+                    // 管理员查看包含用户名
+                    Object[] bookingData = {date, time, room, "Confirmed", name, id};
+                    bookingsList.add(bookingData);
+                } else {
+                    // 普通用户视图
+                    Object[] bookingData = {date, time, room, "Confirmed", id};
+                    bookingsList.add(bookingData);
+                }
             }
             
             // Convert list to array for table model
-            Object[][] bookingsArray = new Object[bookingsList.size()][5];
+            Object[][] bookingsArray = new Object[bookingsList.size()][Main.isAdmin ? 6 : 5];
             for (int i = 0; i < bookingsList.size(); i++) {
                 bookingsArray[i] = bookingsList.get(i);
             }
             
-            // 使用不可编辑的表格模型更新数据
-            bookingsTable.setModel(new javax.swing.table.DefaultTableModel(
-                bookingsArray,
-                new String[] {"Date", "Time", "Room", "Status", "ID"}
-            ) {
-                @Override
-                public boolean isCellEditable(int row, int column) {
-                    return false; // 使所有单元格不可编辑
-                }
-            });
+            // 更新表格模型
+            if (Main.isAdmin) {
+                bookingsTable.setModel(new javax.swing.table.DefaultTableModel(
+                    bookingsArray,
+                    new String[] {"Date", "Time", "Room", "Status", "User", "ID"}
+                ) {
+                    @Override
+                    public boolean isCellEditable(int row, int column) {
+                        return false;
+                    }
+                });
+            } else {
+                bookingsTable.setModel(new javax.swing.table.DefaultTableModel(
+                    bookingsArray,
+                    new String[] {"Date", "Time", "Room", "Status", "ID"}
+                ) {
+                    @Override
+                    public boolean isCellEditable(int row, int column) {
+                        return false;
+                    }
+                });
+            }
             
-            // Hide the ID column as it's only needed for internal operations
-            if (bookingsTable.getColumnCount() > 4) {
-                bookingsTable.getColumnModel().getColumn(4).setMinWidth(0);
-                bookingsTable.getColumnModel().getColumn(4).setMaxWidth(0);
-                bookingsTable.getColumnModel().getColumn(4).setWidth(0);
+            // 隐藏ID列
+            int idColumnIndex = Main.isAdmin ? 5 : 4;
+            if (bookingsTable.getColumnCount() > idColumnIndex) {
+                bookingsTable.getColumnModel().getColumn(idColumnIndex).setMinWidth(0);
+                bookingsTable.getColumnModel().getColumn(idColumnIndex).setMaxWidth(0);
+                bookingsTable.getColumnModel().getColumn(idColumnIndex).setWidth(0);
             }
             
             // Enable cancel button if there are bookings

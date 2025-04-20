@@ -132,10 +132,45 @@ public class RegisterPanel extends JPanel {
         }
         return taken;
     }
+    
+    private boolean isUsernameTaken(String username) {
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        boolean taken = false;
+        
+        try {
+            conn = DriverManager.getConnection("jdbc:sqlite:data.db");
+            String sql = "SELECT COUNT(*) FROM accounts WHERE username = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, username);
+            rs = pstmt.executeQuery();
+            rs.next();
+            int count = rs.getInt(1);
+            taken = count > 0; // 用户名已被使用如果计数大于0
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        } finally {
+            // 确保关闭数据库资源
+            try {
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                System.out.println("Error closing database resources: " + e.getMessage());
+            }
+        }
+        return taken;
+    }
 
     private boolean validateRegistration(String username, String password, String confirmPassword, String email) {
         if (username.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Username cannot be empty.", "Validation Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        
+        if (isUsernameTaken(username)) {
+            JOptionPane.showMessageDialog(this, "Username already exists.", "Validation Error", JOptionPane.ERROR_MESSAGE);
             return false;
         }
         

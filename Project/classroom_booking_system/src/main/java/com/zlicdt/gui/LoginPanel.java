@@ -110,6 +110,13 @@ public class LoginPanel extends JPanel {
             rs = pstmt.executeQuery();
             if (rs.next()) {
                 loginSuccess = true; // Match
+                
+                // 检查是否是admin用户
+                if (username.equals("admin")) {
+                    Main.isAdmin = true;
+                } else {
+                    Main.isAdmin = false;
+                }
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
