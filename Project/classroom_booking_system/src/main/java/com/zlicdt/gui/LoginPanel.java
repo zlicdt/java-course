@@ -5,7 +5,6 @@ import javax.swing.*;
 import com.zlicdt.Main;
 import com.zlicdt.db.DatabaseManager;
 import com.zlicdt.exceptions.DatabaseConnectionException;
-import com.zlicdt.exceptions.DatabaseQueryException;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;

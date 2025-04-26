@@ -8,7 +8,6 @@ import java.awt.event.ActionListener;
 import java.sql.*;
 import com.zlicdt.db.DatabaseManager;
 import com.zlicdt.exceptions.DatabaseConnectionException;
-import com.zlicdt.exceptions.DatabaseQueryException;
 
 public class RegisterPanel extends BasePanel {
     
