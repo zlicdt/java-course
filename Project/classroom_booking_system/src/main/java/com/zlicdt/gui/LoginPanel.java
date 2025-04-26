@@ -3,6 +3,9 @@ package com.zlicdt.gui;
 import javax.swing.*;
 
 import com.zlicdt.Main;
+import com.zlicdt.db.DatabaseManager;
+import com.zlicdt.exceptions.DatabaseConnectionException;
+import com.zlicdt.exceptions.DatabaseQueryException;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -104,7 +107,9 @@ public class LoginPanel extends BasePanel {
         boolean loginSuccess = false;
         
         try {
-            conn = DriverManager.getConnection("jdbc:sqlite:data.db");
+            // 使用DatabaseManager获取连接，而不是直接创建连接
+            DatabaseManager dbManager = DatabaseManager.getInstance();
+            conn = dbManager.getConnection();
             String sql = "SELECT * FROM accounts WHERE username = ? AND password = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
@@ -120,17 +125,21 @@ public class LoginPanel extends BasePanel {
                     Main.isAdmin = false;
                 }
             }
+        } catch (DatabaseConnectionException e) {
+            System.out.println("数据库连接错误: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, 
+                    "无法连接到数据库: " + e.getMessage(), 
+                    "连接错误", 
+                    JOptionPane.ERROR_MESSAGE);
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("SQL查询错误: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, 
+                    "执行登录验证时发生错误: " + e.getMessage(), 
+                    "数据库错误", 
+                    JOptionPane.ERROR_MESSAGE);
         } finally {
             // Ensure database resources are closed
-            try {
-                if (rs != null) rs.close();
-                if (pstmt != null) pstmt.close();
-                if (conn != null) conn.close();
-            } catch (SQLException e) {
-                System.out.println("Error closing database resources: " + e.getMessage());
-            }
+            DatabaseManager.closeResources(conn, pstmt, rs);
         }
         // If there is no match records, return false
         return loginSuccess;

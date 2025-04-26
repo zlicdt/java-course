@@ -1,16 +1,17 @@
-package com.zlicdt;
-import com.formdev.flatlaf.themes.FlatMacLightLaf;
-import com.zlicdt.db.DatabaseManager;
-import com.zlicdt.db.sqliteAction;
 /*
  * Main class to launch the Classroom Booking System application.
  * zlicdt@2025
  * For COMP2013 - OOP - Project
  */
+package com.zlicdt;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
+import com.zlicdt.db.DatabaseManager;
+import com.zlicdt.db.sqliteAction;
+import com.zlicdt.exceptions.DatabaseConnectionException;
+import com.zlicdt.exceptions.DatabaseQueryException;
 import com.zlicdt.gui.Frame;
 import javax.swing.*;
 import java.awt.Dimension;
-import java.sql.SQLException;
 
 public class Main {
     public static String currentUser;
@@ -109,9 +110,14 @@ public class Main {
                 return false; // Should never reach here due to System.exit, but needed for compilation
             }
             return true; // Admin already exists
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(null, "Error checking admin account: " + e.getMessage(), 
-                    "Database Error", JOptionPane.ERROR_MESSAGE);
+        } catch (DatabaseConnectionException e) {
+            JOptionPane.showMessageDialog(null, "Unable to connect to database: " + e.getMessage(), 
+                    "Database Connection Error", JOptionPane.ERROR_MESSAGE);
+            System.exit(1); // Exit on database error
+            return false; // Will not reach here but needed for compilation
+        } catch (DatabaseQueryException e) {
+            JOptionPane.showMessageDialog(null, "Database query error: " + e.getMessage(), 
+                    "Database Operation Error", JOptionPane.ERROR_MESSAGE);
             System.exit(1); // Exit on database error
             return false; // Will not reach here but needed for compilation
         }

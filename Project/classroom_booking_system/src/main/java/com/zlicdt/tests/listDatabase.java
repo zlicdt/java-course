@@ -1,3 +1,8 @@
+/*
+ * This is used to list the database tables and their contents.
+ * Never be called by the main program.
+ */
+
 package com.zlicdt.tests;
 
 import java.sql.*;

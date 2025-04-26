@@ -6,6 +6,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import java.sql.*;
+import com.zlicdt.db.DatabaseManager;
+import com.zlicdt.exceptions.DatabaseConnectionException;
+import com.zlicdt.exceptions.DatabaseQueryException;
 
 public class RegisterPanel extends BasePanel {
     
@@ -106,14 +109,14 @@ public class RegisterPanel extends BasePanel {
     }
     
     private boolean isEmailTaken(String email) {
-        // Existing code remains unchanged
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         boolean taken = false;
         
         try {
-            conn = DriverManager.getConnection("jdbc:sqlite:data.db");
+            DatabaseManager dbManager = DatabaseManager.getInstance();
+            conn = dbManager.getConnection();
             String sql = "SELECT COUNT(*) FROM accounts WHERE email = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, email);
@@ -121,30 +124,33 @@ public class RegisterPanel extends BasePanel {
             rs.next();
             int count = rs.getInt(1);
             taken = count > 0; // Email is taken if count is greater than 0
+        } catch (DatabaseConnectionException e) {
+            System.out.println("数据库连接错误: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, 
+                    "无法连接到数据库: " + e.getMessage(), 
+                    "连接错误", 
+                    JOptionPane.ERROR_MESSAGE);
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("SQL查询错误: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, 
+                    "检查邮箱是否已注册时发生错误: " + e.getMessage(), 
+                    "数据库错误", 
+                    JOptionPane.ERROR_MESSAGE);
         } finally {
-            // Ensure database resources are closed
-            try {
-                if (rs != null) rs.close();
-                if (pstmt != null) pstmt.close();
-                if (conn != null) conn.close();
-            } catch (SQLException e) {
-                System.out.println("Error closing database resources: " + e.getMessage());
-            }
+            DatabaseManager.closeResources(conn, pstmt, rs);
         }
         return taken;
     }
     
     private boolean isUsernameTaken(String username) {
-        // Existing code remains unchanged
         Connection conn = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         boolean taken = false;
         
         try {
-            conn = DriverManager.getConnection("jdbc:sqlite:data.db");
+            DatabaseManager dbManager = DatabaseManager.getInstance();
+            conn = dbManager.getConnection();
             String sql = "SELECT COUNT(*) FROM accounts WHERE username = ?";
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
@@ -152,23 +158,26 @@ public class RegisterPanel extends BasePanel {
             rs.next();
             int count = rs.getInt(1);
             taken = count > 0; // Username is taken if count is greater than 0
+        } catch (DatabaseConnectionException e) {
+            System.out.println("数据库连接错误: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, 
+                    "无法连接到数据库: " + e.getMessage(), 
+                    "连接错误", 
+                    JOptionPane.ERROR_MESSAGE);
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("SQL查询错误: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, 
+                    "检查用户名是否已存在时发生错误: " + e.getMessage(), 
+                    "数据库错误", 
+                    JOptionPane.ERROR_MESSAGE);
         } finally {
-            // Ensure database resources are closed
-            try {
-                if (rs != null) rs.close();
-                if (pstmt != null) pstmt.close();
-                if (conn != null) conn.close();
-            } catch (SQLException e) {
-                System.out.println("Error closing database resources: " + e.getMessage());
-            }
+            DatabaseManager.closeResources(conn, pstmt, rs);
         }
         return taken;
     }
 
     private boolean validateRegistration(String username, String password, String confirmPassword, String email) {
-        // Existing code remains unchanged
+        // Basic validation
         if (username.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Username cannot be empty.", "Validation Error", JOptionPane.ERROR_MESSAGE);
             return false;
@@ -205,7 +214,8 @@ public class RegisterPanel extends BasePanel {
         boolean success = false;
         
         try {
-            conn = DriverManager.getConnection("jdbc:sqlite:data.db");
+            DatabaseManager dbManager = DatabaseManager.getInstance();
+            conn = dbManager.getConnection();
             String sql = "INSERT INTO accounts (username, password, email) VALUES (?, ?, ?)";
             pstmt = conn.prepareStatement(sql);
             pstmt.setString(1, username);
@@ -213,16 +223,20 @@ public class RegisterPanel extends BasePanel {
             pstmt.setString(3, email);
             pstmt.executeUpdate();
             success = true; // Registration successful
+        } catch (DatabaseConnectionException e) {
+            System.out.println("数据库连接错误: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, 
+                    "无法连接到数据库: " + e.getMessage(), 
+                    "连接错误", 
+                    JOptionPane.ERROR_MESSAGE);
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println("注册用户时发生SQL错误: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, 
+                    "创建用户账户时发生错误: " + e.getMessage(), 
+                    "注册失败", 
+                    JOptionPane.ERROR_MESSAGE);
         } finally {
-            // Ensure database resources are closed
-            try {
-                if (pstmt != null) pstmt.close();
-                if (conn != null) conn.close();
-            } catch (SQLException e) {
-                System.out.println("Error closing database resources: " + e.getMessage());
-            }
+            DatabaseManager.closeResources(conn, pstmt, null);
         }
         return success;
     }

@@ -11,6 +11,8 @@ import java.sql.Statement;
 
 import com.zlicdt.Main;
 import com.zlicdt.db.DatabaseManager;
+import com.zlicdt.exceptions.DatabaseConnectionException;
+import com.zlicdt.exceptions.DatabaseQueryException;
 
 public class BookingHistoryPanel extends BasePanel {
     private JTable bookingsTable;
@@ -118,12 +120,20 @@ public class BookingHistoryPanel extends BasePanel {
                                     JOptionPane.ERROR_MESSAGE
                                 );
                             }
-                        } catch (SQLException ex) {
-                            System.out.println("Database error: " + ex.getMessage());
+                        } catch (DatabaseConnectionException ex) {
+                            System.out.println("数据库连接错误: " + ex.getMessage());
                             JOptionPane.showMessageDialog(
                                 BookingHistoryPanel.this,
-                                "Error cancelling booking: " + ex.getMessage(),
-                                "Database Error",
+                                "无法连接到数据库: " + ex.getMessage(),
+                                "连接错误",
+                                JOptionPane.ERROR_MESSAGE
+                            );
+                        } catch (DatabaseQueryException ex) {
+                            System.out.println("数据库查询错误: " + ex.getMessage());
+                            JOptionPane.showMessageDialog(
+                                BookingHistoryPanel.this,
+                                "取消预订时出现错误: " + ex.getMessage(),
+                                "查询错误",
                                 JOptionPane.ERROR_MESSAGE
                             );
                         }
@@ -219,12 +229,24 @@ public class BookingHistoryPanel extends BasePanel {
             JButton cancelButton = (JButton) ((JPanel) getComponent(2)).getComponent(0);
             cancelButton.setEnabled(bookingsTable.getRowCount() > 0);
             
-        } catch (SQLException e) {
-            System.out.println("Database error: " + e.getMessage());
+        } catch (DatabaseConnectionException e) {
+            System.out.println("数据库连接错误: " + e.getMessage());
             JOptionPane.showMessageDialog(this, 
-                                         "Error loading bookings: " + e.getMessage(), 
-                                         "Database Error", 
-                                         JOptionPane.ERROR_MESSAGE);
+                                     "无法连接到数据库: " + e.getMessage(), 
+                                     "连接错误", 
+                                     JOptionPane.ERROR_MESSAGE);
+        } catch (DatabaseQueryException e) {
+            System.out.println("数据库查询错误: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, 
+                                     "查询预订记录失败: " + e.getMessage(), 
+                                     "查询错误", 
+                                     JOptionPane.ERROR_MESSAGE);
+        } catch (SQLException e) {
+            System.out.println("SQL操作错误: " + e.getMessage());
+            JOptionPane.showMessageDialog(this, 
+                                     "处理查询结果时出错: " + e.getMessage(), 
+                                     "数据库错误", 
+                                     JOptionPane.ERROR_MESSAGE);
         } finally {
             // Ensure database connection closure
             if (rs != null) {
@@ -236,7 +258,7 @@ public class BookingHistoryPanel extends BasePanel {
                     }
                     DatabaseManager.closeResources(resultConn, resultStmt, rs);
                 } catch (SQLException ex) {
-                    System.out.println("Error closing resources: " + ex.getMessage());
+                    System.out.println("关闭数据库资源时出错: " + ex.getMessage());
                 }
             }
         }

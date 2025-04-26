@@ -4,13 +4,14 @@ import javax.swing.*;
 
 import com.zlicdt.Main;
 import com.zlicdt.db.DatabaseManager;
+import com.zlicdt.exceptions.DatabaseConnectionException;
+import com.zlicdt.exceptions.DatabaseQueryException;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.sql.SQLException;
 
 public class MainPanel extends BasePanel {
     
@@ -223,22 +224,30 @@ public class MainPanel extends BasePanel {
                                     );
                                 }
                                     
-                            } catch (SQLException ex) {
+                            } catch (DatabaseConnectionException ex) {
                                 JOptionPane.showMessageDialog(
                                     bookingDialog,
-                                    "Database error: " + ex.getMessage(),
-                                    "Booking Failed",
+                                    "数据库连接错误: " + ex.getMessage(),
+                                    "连接失败",
                                     JOptionPane.ERROR_MESSAGE
                                 );
-                                System.out.println("Database error: " + ex.getMessage());
+                                System.out.println("数据库连接错误: " + ex.getMessage());
+                            } catch (DatabaseQueryException ex) {
+                                JOptionPane.showMessageDialog(
+                                    bookingDialog,
+                                    "数据库查询错误: " + ex.getMessage(),
+                                    "预订失败",
+                                    JOptionPane.ERROR_MESSAGE
+                                );
+                                System.out.println("数据库查询错误: " + ex.getMessage());
                             } catch (Exception ex) {
                                 JOptionPane.showMessageDialog(
                                     bookingDialog,
-                                    "Error: " + ex.getMessage(),
-                                    "Booking Failed",
+                                    "发生未知错误: " + ex.getMessage(),
+                                    "预订失败",
                                     JOptionPane.ERROR_MESSAGE
                                 );
-                                System.out.println("Error: " + ex.getMessage());
+                                System.out.println("未知错误: " + ex.getMessage());
                             }
                         }
                     });
