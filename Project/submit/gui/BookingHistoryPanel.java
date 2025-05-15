@@ -4,10 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.io.*;
 
 import main.Main;
 import db.DatabaseManager;
@@ -144,6 +142,17 @@ public class BookingHistoryPanel extends BasePanel {
         
         actionPanel.add(cancelButton);
         
+        // Add Save button to export bookings to file
+        JButton saveButton = new JButton("Save");
+        saveButton.setEnabled(false); // Initially disabled
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveBookingsToFile();
+            }
+        });
+        actionPanel.add(saveButton);
+        
         // Add components to the panel
         add(headerPanel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
@@ -179,11 +188,11 @@ public class BookingHistoryPanel extends BasePanel {
                 // Add booking data to list
                 if (Main.isAdmin) {
                     // Admin view includes username
-                    Object[] bookingData = {date, time, room, "Confirmed", name, id};
+                    Object[] bookingData = {date, time, room, "Confirmd", name, id};
                     bookingsList.add(bookingData);
                 } else {
                     // Regular user view
-                    Object[] bookingData = {date, time, room, "Confirmed", id};
+                    Object[] bookingData = {date, time, room, "Confirmd", id};
                     bookingsList.add(bookingData);
                 }
             }
@@ -229,6 +238,12 @@ public class BookingHistoryPanel extends BasePanel {
             JButton cancelButton = (JButton) ((JPanel) getComponent(2)).getComponent(0);
             cancelButton.setEnabled(bookingsTable.getRowCount() > 0);
             
+            // Enable save button if there are bookings
+            if (((JPanel) getComponent(2)).getComponentCount() > 1) {
+                JButton saveButton = (JButton) ((JPanel) getComponent(2)).getComponent(1);
+                saveButton.setEnabled(bookingsTable.getRowCount() > 0);
+            }
+            
         } catch (DatabaseConnectionException e) {
             System.out.println("Database connection error: " + e.getMessage());
             JOptionPane.showMessageDialog(this, 
@@ -264,6 +279,66 @@ public class BookingHistoryPanel extends BasePanel {
         }
     }
     
+    // Method to save booking information to file
+    private void saveBookingsToFile() {
+        // Create filename based on current username
+        String fileName = "save_" + Main.currentUser + ".txt";
+        
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            // Get table model
+            javax.swing.table.TableModel model = bookingsTable.getModel();
+            int rowCount = model.getRowCount();
+            
+            // Write header based on user type
+            if (Main.isAdmin) {
+                writer.write("Date|Time|Room|User\n");
+            } else {
+                writer.write("Date|Time|Room\n");
+            }
+            
+            // Write data rows
+            for (int i = 0; i < rowCount; i++) {
+                StringBuilder line = new StringBuilder();
+                
+                // Date
+                line.append(model.getValueAt(i, 0)).append("|");
+                // Time
+                line.append(model.getValueAt(i, 1)).append("|");
+                // Room
+                line.append(model.getValueAt(i, 2)).append("|");
+                // Status
+                // line.append(model.getValueAt(i, 3));
+                
+                // Add User if admin view
+                if (Main.isAdmin) {
+                    line.append(model.getValueAt(i, 4));
+                }
+                
+                // Add newline
+                line.append("\n");
+                
+                // Write to file
+                writer.write(line.toString());
+            }
+            
+            JOptionPane.showMessageDialog(
+                this,
+                "Bookings successfully saved to " + fileName,
+                "Save Successful",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+            
+        } catch (IOException ex) {
+            System.out.println("File write error: " + ex.getMessage());
+            JOptionPane.showMessageDialog(
+                this,
+                "Failed to save bookings: " + ex.getMessage(),
+                "Save Failed",
+                JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
     @Override
     public void updateDisplay() {
         refreshBookings();
