@@ -177,6 +177,8 @@ public class RegisterPanel extends BasePanel {
 
     private boolean validateRegistration(String username, String password, String confirmPassword, String email) {
         // A very complex and userless validation
+        // That's to avoid input data too STRANGE
+        // Its essential to use trim() to remove space
         if (username.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Username cannot be empty.", "Validation Error", JOptionPane.ERROR_MESSAGE);
             return false;

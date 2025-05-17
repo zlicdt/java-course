@@ -271,10 +271,9 @@ public class MainPanel extends BasePanel {
         // Clone the calendar to avoid modifying the original
         Calendar cal = (Calendar) month.clone();
         
-        // Set to first day of month
+        // Set to first day in month
         cal.set(Calendar.DAY_OF_MONTH, 1);
         
-        // Create panel with grid layout (7 columns for days of week)
         JPanel monthPanel = new JPanel(new BorderLayout());
         
         // Header panel for days of week
@@ -288,7 +287,7 @@ public class MainPanel extends BasePanel {
         // Grid panel for days of month
         JPanel daysPanel = new JPanel(new GridLayout(0, 7));
         
-        // Get the day of week for the first day of month (0 = Sunday, 1 = Monday, etc.)
+        // Get the day of week for the first day of month, 0-6 = Sunday-Saturday
         int firstDayOfWeek = cal.get(Calendar.DAY_OF_WEEK) - 1;
         
         // Get the number of days in the month
