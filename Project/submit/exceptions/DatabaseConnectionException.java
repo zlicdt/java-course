@@ -1,8 +1,5 @@
 package exceptions;
 
-/**
- * Custom exception class for handling database connection issues
- */
 public class DatabaseConnectionException extends Exception {
     
     // Default constructor

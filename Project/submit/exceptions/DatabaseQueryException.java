@@ -1,8 +1,5 @@
 package exceptions;
 
-/**
- * Custom exception class for handling database query or operation issues
- */
 public class DatabaseQueryException extends Exception {
     
     // No-argument constructor

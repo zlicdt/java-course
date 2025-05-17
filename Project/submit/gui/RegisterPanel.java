@@ -23,7 +23,7 @@ public class RegisterPanel extends BasePanel {
     }
     
     @Override
-    protected void initializePanel() {
+    public void initializePanel() {
         setLayout(new BorderLayout());
         
         // Create registration form panel
@@ -176,7 +176,7 @@ public class RegisterPanel extends BasePanel {
     }
 
     private boolean validateRegistration(String username, String password, String confirmPassword, String email) {
-        // Basic validation
+        // A very complex and userless validation
         if (username.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Username cannot be empty.", "Validation Error", JOptionPane.ERROR_MESSAGE);
             return false;

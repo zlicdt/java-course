@@ -23,7 +23,7 @@ public class LoginPanel extends BasePanel {
     }
     
     @Override
-    protected void initializePanel() {
+    public void initializePanel() {
         setLayout(new BorderLayout());
         
         // Create login form panel
@@ -125,16 +125,16 @@ public class LoginPanel extends BasePanel {
                 }
             }
         } catch (DatabaseConnectionException e) {
-            System.out.println("数据库连接错误: " + e.getMessage());
+            System.out.println("Database connection error: " + e.getMessage());
             JOptionPane.showMessageDialog(this, 
-                    "无法连接到数据库: " + e.getMessage(), 
-                    "连接错误", 
+                    "Unable to connect to database: " + e.getMessage(), 
+                    "Connection Error", 
                     JOptionPane.ERROR_MESSAGE);
         } catch (SQLException e) {
-            System.out.println("SQL查询错误: " + e.getMessage());
+            System.out.println("SQL query error: " + e.getMessage());
             JOptionPane.showMessageDialog(this, 
-                    "执行登录验证时发生错误: " + e.getMessage(), 
-                    "数据库错误", 
+                    "Failed to validation: " + e.getMessage(), 
+                    "Database Error", 
                     JOptionPane.ERROR_MESSAGE);
         } finally {
             // Ensure database resources are closed

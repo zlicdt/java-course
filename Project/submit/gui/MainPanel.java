@@ -27,7 +27,7 @@ public class MainPanel extends BasePanel {
     }
     
     @Override
-    protected void initializePanel() {
+    public void initializePanel() {
         this.dbManager = DatabaseManager.getInstance();
         // Initialize userLabel
         this.userLabel = new JLabel(Main.currentUser);

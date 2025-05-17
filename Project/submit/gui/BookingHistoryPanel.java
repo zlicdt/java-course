@@ -23,7 +23,7 @@ public class BookingHistoryPanel extends BasePanel {
     }
     
     @Override
-    protected void initializePanel() {
+    public void initializePanel() {
         this.dbManager = DatabaseManager.getInstance();
         setLayout(new BorderLayout());
         
@@ -67,7 +67,6 @@ public class BookingHistoryPanel extends BasePanel {
         
         scrollPane = new JScrollPane(bookingsTable);
         
-        // Add empty panel at the bottom for future use (e.g., cancel booking button)
         JPanel actionPanel = new JPanel();
         JButton cancelButton = new JButton("Cancel Selected Booking");
         cancelButton.setEnabled(false); // Initially disabled
@@ -144,7 +143,8 @@ public class BookingHistoryPanel extends BasePanel {
         
         // Add Save button to export bookings to file
         JButton saveButton = new JButton("Save");
-        saveButton.setEnabled(false); // Initially disabled
+         // Initially disabled
+        saveButton.setEnabled(false);
         saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -186,6 +186,7 @@ public class BookingHistoryPanel extends BasePanel {
                 String name = rs.getString("name");
                 
                 // Add booking data to list
+                // The data structure is data|time|room|Comfirmd|username|id
                 if (Main.isAdmin) {
                     // Admin view includes username
                     Object[] bookingData = {date, time, room, "Confirmd", name, id};
@@ -243,7 +244,7 @@ public class BookingHistoryPanel extends BasePanel {
                 JButton saveButton = (JButton) ((JPanel) getComponent(2)).getComponent(1);
                 saveButton.setEnabled(bookingsTable.getRowCount() > 0);
             }
-            
+            // Das schiebe Exceptions
         } catch (DatabaseConnectionException e) {
             System.out.println("Database connection error: " + e.getMessage());
             JOptionPane.showMessageDialog(this, 
