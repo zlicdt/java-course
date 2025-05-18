@@ -1,5 +1,9 @@
 # COMP 2013 OOP Project - Classroom Booking System
 ## Run
+**Important!!!: The Java version can not smaller than 21!!**
+
+If can not run(java.lang.UnsupportedClassVersionError), please build manually(at the end of this file).
+
 Excute: `java -jar ClassroomBookingSystem.jar`
 
 ## Structure
